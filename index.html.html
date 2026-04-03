@@ -725,9 +725,10 @@ input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
     </div>
     <div class="nav-links">
       <button class="nav-link active" onclick="scrollToId('predictor')">Predictor</button>
-      <button class="nav-link" onclick="scrollToId('pipeline')">Pipeline</button>
+      <button class="nav-link" onclick="scrollToId('compare')">Compare</button>
+      <button class="nav-link" onclick="scrollToId('chart')">Charts</button>
+      <button class="nav-link" onclick="scrollToId('mortgage')">EMI Calc</button>
       <button class="nav-link" onclick="scrollToId('models')">Models</button>
-      <button class="nav-link" onclick="scrollToId('features')">Features</button>
     </div>
     <button class="nav-cta" onclick="scrollToId('predictor')">Try Predictor →</button>
   </div>
@@ -984,6 +985,10 @@ input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
             <div class="breakdown-title">Price Breakdown</div>
             <div id="bd-rows"></div>
           </div>
+
+          <button onclick="exportPDF()" style="width:100%;background:var(--off);color:var(--ink2);border:1px solid var(--border2);border-radius:var(--radius-s);padding:12px;font-family:inherit;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='var(--subtle)'" onmouseout="this.style.background='var(--off)'">
+            📄 Download Report as PDF
+          </button>
         </div>
       </div>
     </div>
@@ -1188,6 +1193,227 @@ input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
   </div>
 </section>
 
+<!-- ═══════════ COMPARE ═══════════ -->
+<section class="section section-border" id="compare">
+  <div class="container">
+    <div class="section-eyebrow">Side by Side</div>
+    <div class="section-title">Compare<br/><em>two properties.</em></div>
+    <p class="section-desc" style="margin-bottom:36px;">Configure two properties and see which one gives better value for money.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+      <!-- HOUSE A -->
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-l);padding:28px;box-shadow:var(--shadow-s);">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin-bottom:20px;">🏠 Property A</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:4px;">AREA (SQ FT)</div><input id="ca-area" type="number" value="1800" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:4px;">BEDS</div><input id="ca-beds" type="number" value="3" min="1" max="6" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;"/></div>
+            <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:4px;">BATHS</div><input id="ca-baths" type="number" value="2" min="1" max="4" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;"/></div>
+          </div>
+          <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:4px;">AGE (YEARS)</div><input id="ca-age" type="number" value="8" min="0" max="40" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;"/></div>
+          <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:6px;">LOCATION</div>
+            <select id="ca-loc" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;background:var(--white);">
+              <option value="rural">Rural (×0.72)</option>
+              <option value="suburban" selected>Suburban (×1.00)</option>
+              <option value="prime">Prime (×1.45)</option>
+            </select>
+          </div>
+          <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:6px;">GARAGE</div>
+            <select id="ca-garage" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;background:var(--white);">
+              <option value="1">Yes</option><option value="0">No</option>
+            </select>
+          </div>
+        </div>
+        <div id="ca-result" style="margin-top:16px;padding:14px;background:var(--blue-s);border:1px solid rgba(26,86,219,0.2);border-radius:var(--radius-s);display:none;">
+          <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin-bottom:4px;">Estimated Value</div>
+          <div id="ca-price" style="font-family:'Fraunces',serif;font-size:1.8rem;font-weight:500;letter-spacing:-1px;color:var(--ink);"></div>
+          <div id="ca-psf" style="font-size:0.75rem;color:var(--muted);margin-top:2px;"></div>
+        </div>
+      </div>
+
+      <!-- HOUSE B -->
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-l);padding:28px;box-shadow:var(--shadow-s);">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:20px;">🏡 Property B</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:4px;">AREA (SQ FT)</div><input id="cb-area" type="number" value="2500" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:4px;">BEDS</div><input id="cb-beds" type="number" value="4" min="1" max="6" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;"/></div>
+            <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:4px;">BATHS</div><input id="cb-baths" type="number" value="3" min="1" max="4" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;"/></div>
+          </div>
+          <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:4px;">AGE (YEARS)</div><input id="cb-age" type="number" value="3" min="0" max="40" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;"/></div>
+          <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:6px;">LOCATION</div>
+            <select id="cb-loc" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;background:var(--white);">
+              <option value="rural">Rural (×0.72)</option>
+              <option value="suburban">Suburban (×1.00)</option>
+              <option value="prime" selected>Prime (×1.45)</option>
+            </select>
+          </div>
+          <div><div style="font-size:0.72rem;font-weight:600;color:var(--ink2);margin-bottom:6px;">GARAGE</div>
+            <select id="cb-garage" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:0.9rem;outline:none;background:var(--white);">
+              <option value="1">Yes</option><option value="0">No</option>
+            </select>
+          </div>
+        </div>
+        <div id="cb-result" style="margin-top:16px;padding:14px;background:var(--green-s);border:1px solid rgba(13,122,85,0.2);border-radius:var(--radius-s);display:none;">
+          <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:4px;">Estimated Value</div>
+          <div id="cb-price" style="font-family:'Fraunces',serif;font-size:1.8rem;font-weight:500;letter-spacing:-1px;color:var(--ink);"></div>
+          <div id="cb-psf" style="font-size:0.75rem;color:var(--muted);margin-top:2px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARE BUTTON -->
+    <button onclick="runCompare()" style="margin-top:20px;width:100%;background:var(--ink);color:var(--white);border:none;border-radius:var(--radius-s);padding:14px;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.2px;">Compare Both Properties →</button>
+
+    <!-- VERDICT -->
+    <div id="compare-verdict" style="display:none;margin-top:20px;padding:20px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-s);">
+      <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Comparison Verdict</div>
+      <div id="verdict-text" style="font-size:1rem;color:var(--ink);line-height:1.7;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CHARTS ═══════════ -->
+<section class="section section-border" id="chart">
+  <div class="container">
+    <div class="section-eyebrow">Price Analysis</div>
+    <div class="section-title">How features<br/><em>affect price.</em></div>
+    <p class="section-desc" style="margin-bottom:36px;">See how area and age impact property value across all three location tiers.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <!-- AREA CHART -->
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-l);padding:24px;box-shadow:var(--shadow-s);">
+        <div style="font-size:0.78rem;font-weight:600;color:var(--ink);margin-bottom:16px;">Price vs Area (3bed/2bath, age 10, no garage)</div>
+        <canvas id="areaChart" height="200"></canvas>
+      </div>
+      <!-- AGE CHART -->
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-l);padding:24px;box-shadow:var(--shadow-s);">
+        <div style="font-size:0.78rem;font-weight:600;color:var(--ink);margin-bottom:16px;">Price vs Age (1800sqft, 3bed/2bath, no garage)</div>
+        <canvas id="ageChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ MAP ═══════════ -->
+<section class="section section-border" id="map">
+  <div class="container">
+    <div class="section-eyebrow">Location Tiers</div>
+    <div class="section-title">Where you buy<br/><em>matters most.</em></div>
+    <p class="section-desc" style="margin-bottom:36px;">Location is the second biggest price driver after area. See the premium difference visually.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div style="background:var(--white);border:2px solid var(--blue);border-radius:var(--radius-l);padding:28px;text-align:center;box-shadow:var(--shadow-m);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🏙️</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:500;color:var(--ink);letter-spacing:-0.5px;">Prime</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin:6px 0 14px;">City centre, metro area</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--blue);">×1.45 multiplier</div>
+        <div style="margin-top:12px;padding:10px;background:var(--blue-s);border-radius:var(--radius-s);">
+          <div style="font-size:0.72rem;color:var(--blue);font-weight:600;">45% premium over suburban</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">1,800sqft avg: ~$271,000</div>
+        </div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-l);padding:28px;text-align:center;box-shadow:var(--shadow-s);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🏘️</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:500;color:var(--ink);letter-spacing:-0.5px;">Suburban</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin:6px 0 14px;">Residential outskirts</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--ink2);">×1.00 baseline</div>
+        <div style="margin-top:12px;padding:10px;background:var(--subtle);border-radius:var(--radius-s);">
+          <div style="font-size:0.72rem;color:var(--ink2);font-weight:600;">Standard baseline price</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">1,800sqft avg: ~$187,000</div>
+        </div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-l);padding:28px;text-align:center;box-shadow:var(--shadow-s);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🌾</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:500;color:var(--ink);letter-spacing:-0.5px;">Rural</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin:6px 0 14px;">Countryside, outskirts</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--amber);">×0.72 multiplier</div>
+        <div style="margin-top:12px;padding:10px;background:var(--amber-s);border-radius:var(--radius-s);">
+          <div style="font-size:0.72rem;color:var(--amber);font-weight:600;">28% below suburban</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">1,800sqft avg: ~$135,000</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ MORTGAGE ═══════════ -->
+<section class="section section-border" id="mortgage">
+  <div class="container">
+    <div class="section-eyebrow">Financial Planning</div>
+    <div class="section-title">Monthly EMI<br/><em>calculator.</em></div>
+    <p class="section-desc" style="margin-bottom:36px;">Calculate your monthly mortgage payment based on the predicted price, down payment, and interest rate.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+
+      <!-- INPUTS -->
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-l);padding:28px;box-shadow:var(--shadow-s);">
+        <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:20px;">Loan Parameters</div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:0.72rem;font-weight:600;color:var(--ink2);">PROPERTY PRICE</span>
+              <span style="font-family:'Fraunces',serif;font-size:1rem;color:var(--ink);" id="emi-price-disp">$187,000</span>
+            </div>
+            <input type="range" id="emi-price" min="50000" max="600000" step="1000" value="187000" oninput="updateEMI()"/>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;"><span style="font-size:0.65rem;color:var(--muted2);">$50K</span><span style="font-size:0.65rem;color:var(--muted2);">$600K</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:0.72rem;font-weight:600;color:var(--ink2);">DOWN PAYMENT</span>
+              <span style="font-family:'Fraunces',serif;font-size:1rem;color:var(--ink);" id="emi-down-disp">20%</span>
+            </div>
+            <input type="range" id="emi-down" min="5" max="50" step="1" value="20" oninput="updateEMI()"/>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;"><span style="font-size:0.65rem;color:var(--muted2);">5%</span><span style="font-size:0.65rem;color:var(--muted2);">50%</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:0.72rem;font-weight:600;color:var(--ink2);">INTEREST RATE (p.a.)</span>
+              <span style="font-family:'Fraunces',serif;font-size:1rem;color:var(--ink);" id="emi-rate-disp">7.5%</span>
+            </div>
+            <input type="range" id="emi-rate" min="4" max="15" step="0.1" value="7.5" oninput="updateEMI()"/>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;"><span style="font-size:0.65rem;color:var(--muted2);">4%</span><span style="font-size:0.65rem;color:var(--muted2);">15%</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:0.72rem;font-weight:600;color:var(--ink2);">LOAN TENURE</span>
+              <span style="font-family:'Fraunces',serif;font-size:1rem;color:var(--ink);" id="emi-tenure-disp">20 years</span>
+            </div>
+            <input type="range" id="emi-tenure" min="5" max="30" step="1" value="20" oninput="updateEMI()"/>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;"><span style="font-size:0.65rem;color:var(--muted2);">5 yrs</span><span style="font-size:0.65rem;color:var(--muted2);">30 yrs</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:var(--ink);border-radius:var(--radius-l);padding:28px;color:var(--white);position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),#6366f1);"></div>
+          <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Monthly EMI</div>
+          <div id="emi-result" style="font-family:'Fraunces',serif;font-size:2.8rem;font-weight:500;letter-spacing:-1.5px;line-height:1;">$1,204</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:6px;">per month</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;box-shadow:var(--shadow-s);">
+            <div style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Loan Amount</div>
+            <div id="emi-loan" style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:500;color:var(--ink);">$149,600</div>
+          </div>
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;box-shadow:var(--shadow-s);">
+            <div style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Down Payment</div>
+            <div id="emi-downamt" style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:500;color:var(--ink);">$37,400</div>
+          </div>
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;box-shadow:var(--shadow-s);">
+            <div style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Total Interest</div>
+            <div id="emi-interest" style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:500;color:var(--red);">$139,360</div>
+          </div>
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;box-shadow:var(--shadow-s);">
+            <div style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Total Payment</div>
+            <div id="emi-total" style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:500;color:var(--ink);">$288,960</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════ FOOTER ═══════════ -->
 <div class="container">
   <div class="footer">
@@ -1208,6 +1434,7 @@ input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 /* ── HELPERS ── */
 function scrollToId(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
@@ -1320,7 +1547,165 @@ function runPredict(){
   }, 1000);
 }
 
-/* ── FEATURE BARS ── */
+/* ── COMPARE ── */
+function calcPrice(area, beds, baths, age, loc, garage) {
+  const locMult = loc === 'prime' ? 1.45 : loc === 'suburban' ? 1.0 : 0.72;
+  const ageMult = Math.max(0.75, 1 - age * 0.012);
+  return Math.round((area*95 + beds*8000 + baths*5500 + (garage?12000:0)) * locMult * ageMult / 1000) * 1000;
+}
+
+function runCompare() {
+  const aArea  = +document.getElementById('ca-area').value;
+  const aBeds  = +document.getElementById('ca-beds').value;
+  const aBaths = +document.getElementById('ca-baths').value;
+  const aAge   = +document.getElementById('ca-age').value;
+  const aLoc   = document.getElementById('ca-loc').value;
+  const aGar   = +document.getElementById('ca-garage').value;
+
+  const bArea  = +document.getElementById('cb-area').value;
+  const bBeds  = +document.getElementById('cb-beds').value;
+  const bBaths = +document.getElementById('cb-baths').value;
+  const bAge   = +document.getElementById('cb-age').value;
+  const bLoc   = document.getElementById('cb-loc').value;
+  const bGar   = +document.getElementById('cb-garage').value;
+
+  const pA = calcPrice(aArea, aBeds, aBaths, aAge, aLoc, aGar);
+  const pB = calcPrice(bArea, bBeds, bBaths, bAge, bLoc, bGar);
+  const psfA = Math.round(pA/aArea);
+  const psfB = Math.round(pB/bArea);
+
+  document.getElementById('ca-result').style.display = 'block';
+  document.getElementById('cb-result').style.display = 'block';
+  document.getElementById('ca-price').textContent = '$' + pA.toLocaleString();
+  document.getElementById('ca-psf').textContent = '$' + psfA + ' per sq ft';
+  document.getElementById('cb-price').textContent = '$' + pB.toLocaleString();
+  document.getElementById('cb-psf').textContent = '$' + psfB + ' per sq ft';
+
+  const diff = Math.abs(pA - pB);
+  const pct  = ((diff / Math.min(pA,pB)) * 100).toFixed(1);
+  const winner = pA < pB ? 'A' : 'B';
+  const betterVal = psfA < psfB ? 'A' : 'B';
+
+  document.getElementById('compare-verdict').style.display = 'block';
+  document.getElementById('verdict-text').innerHTML = `
+    <strong>Property ${pA < pB ? 'A' : 'B'}</strong> is cheaper by <strong>$${diff.toLocaleString()} (${pct}%)</strong>.<br/>
+    <strong>Property ${betterVal}</strong> offers better value per sq ft ($${Math.min(psfA,psfB)}/sqft vs $${Math.max(psfA,psfB)}/sqft).<br/><br/>
+    ${winner === betterVal ? `✅ <strong>Property ${winner}</strong> wins on both price and value per sq ft.` : `⚖️ Trade-off: Property ${pA<pB?'A':'B'} costs less overall, but Property ${betterVal} gives more space per dollar.`}
+  `;
+}
+
+/* ── CHARTS ── */
+window.addEventListener('load', () => {
+  // Area chart
+  const areaLabels = [500,800,1100,1400,1700,2000,2300,2600,2900,3200,3500,4000];
+  const makeAreaData = (locMult) => areaLabels.map(a =>
+    Math.round((a*95 + 3*8000 + 2*5500) * locMult * Math.max(0.75, 1-10*0.012) / 1000)
+  );
+  new Chart(document.getElementById('areaChart'), {
+    type: 'line',
+    data: {
+      labels: areaLabels,
+      datasets: [
+        { label:'Prime', data: makeAreaData(1.45), borderColor:'#1a56db', backgroundColor:'rgba(26,86,219,0.06)', tension:0.4, fill:true, pointRadius:3 },
+        { label:'Suburban', data: makeAreaData(1.0), borderColor:'#0d7a55', backgroundColor:'rgba(13,122,85,0.06)', tension:0.4, fill:true, pointRadius:3 },
+        { label:'Rural', data: makeAreaData(0.72), borderColor:'#b45309', backgroundColor:'rgba(180,83,9,0.06)', tension:0.4, fill:true, pointRadius:3 },
+      ]
+    },
+    options: { responsive:true, plugins:{ legend:{ labels:{ font:{ family:'Plus Jakarta Sans', size:11 } } } }, scales:{ y:{ ticks:{ callback: v => '$'+v+'K', font:{size:10} } }, x:{ ticks:{ font:{size:10} } } } }
+  });
+
+  // Age chart
+  const ageLabels = [0,5,10,15,20,25,30,35,40];
+  const makeAgeData = (locMult) => ageLabels.map(age =>
+    Math.round((1800*95 + 3*8000 + 2*5500) * locMult * Math.max(0.75, 1-age*0.012) / 1000)
+  );
+  new Chart(document.getElementById('ageChart'), {
+    type: 'line',
+    data: {
+      labels: ageLabels,
+      datasets: [
+        { label:'Prime', data: makeAgeData(1.45), borderColor:'#1a56db', backgroundColor:'rgba(26,86,219,0.06)', tension:0.4, fill:true, pointRadius:3 },
+        { label:'Suburban', data: makeAgeData(1.0), borderColor:'#0d7a55', backgroundColor:'rgba(13,122,85,0.06)', tension:0.4, fill:true, pointRadius:3 },
+        { label:'Rural', data: makeAgeData(0.72), borderColor:'#b45309', backgroundColor:'rgba(180,83,9,0.06)', tension:0.4, fill:true, pointRadius:3 },
+      ]
+    },
+    options: { responsive:true, plugins:{ legend:{ labels:{ font:{ family:'Plus Jakarta Sans', size:11 } } } }, scales:{ y:{ ticks:{ callback: v => '$'+v+'K', font:{size:10} } }, x:{ title:{ display:true, text:'Age (years)', font:{size:10} } } } }
+  });
+});
+
+/* ── EMI CALCULATOR ── */
+function updateEMI() {
+  const price   = +document.getElementById('emi-price').value;
+  const downPct = +document.getElementById('emi-down').value;
+  const rate    = +document.getElementById('emi-rate').value;
+  const years   = +document.getElementById('emi-tenure').value;
+
+  document.getElementById('emi-price-disp').textContent  = '$' + price.toLocaleString();
+  document.getElementById('emi-down-disp').textContent   = downPct + '%';
+  document.getElementById('emi-rate-disp').textContent   = rate + '%';
+  document.getElementById('emi-tenure-disp').textContent = years + ' years';
+
+  const downAmt  = Math.round(price * downPct / 100);
+  const loan     = price - downAmt;
+  const r        = rate / 100 / 12;
+  const n        = years * 12;
+  const emi      = Math.round(loan * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1));
+  const total    = emi * n;
+  const interest = total - loan;
+
+  document.getElementById('emi-result').textContent   = '$' + emi.toLocaleString();
+  document.getElementById('emi-loan').textContent     = '$' + loan.toLocaleString();
+  document.getElementById('emi-downamt').textContent  = '$' + downAmt.toLocaleString();
+  document.getElementById('emi-interest').textContent = '$' + interest.toLocaleString();
+  document.getElementById('emi-total').textContent    = '$' + total.toLocaleString();
+}
+updateEMI();
+
+/* ── PDF EXPORT ── */
+function exportPDF() {
+  const price = document.getElementById('result-price')?.textContent;
+  const range = document.getElementById('result-range')?.textContent;
+  const psf   = document.getElementById('res-psf')?.textContent;
+  if(!price || price === '—') { alert('Run a prediction first!'); return; }
+  const area  = document.getElementById('area-range').value;
+  const beds  = document.getElementById('beds').value;
+  const baths = document.getElementById('baths').value;
+  const age   = document.getElementById('age-range').value;
+  const w = window.open('','_blank');
+  w.document.write(`
+    <html><head><title>HomeIQ Report</title>
+    <style>
+      body{font-family:Georgia,serif;max-width:600px;margin:40px auto;color:#1a1814;line-height:1.6;}
+      h1{font-size:2rem;letter-spacing:-1px;margin-bottom:4px;}
+      .sub{color:#8a8070;font-size:0.9rem;margin-bottom:32px;}
+      .price{font-size:3rem;letter-spacing:-2px;color:#1a56db;margin:20px 0 4px;}
+      .range{color:#8a8070;font-size:0.85rem;font-family:monospace;margin-bottom:28px;}
+      table{width:100%;border-collapse:collapse;margin-top:20px;}
+      td{padding:10px 0;border-bottom:1px solid #e4e0d8;font-size:0.9rem;}
+      td:last-child{text-align:right;font-family:monospace;}
+      .footer{margin-top:40px;padding-top:16px;border-top:1px solid #e4e0d8;font-size:0.75rem;color:#b8b0a0;}
+    </style></head>
+    <body>
+      <h1>🏠 HomeIQ</h1>
+      <div class="sub">Property Valuation Report · ${new Date().toLocaleDateString()}</div>
+      <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#8a8070;">Estimated Market Value</div>
+      <div class="price">${price}</div>
+      <div class="range">${range}</div>
+      <table>
+        <tr><td>Floor Area</td><td>${parseInt(area).toLocaleString()} sq ft</td></tr>
+        <tr><td>Bedrooms</td><td>${beds}</td></tr>
+        <tr><td>Bathrooms</td><td>${baths}</td></tr>
+        <tr><td>Property Age</td><td>${age} years</td></tr>
+        <tr><td>Price per sq ft</td><td>${psf}</td></tr>
+        <tr><td>Model</td><td>Random Forest (R² 92.4%)</td></tr>
+      </table>
+      <div class="footer">Generated by HomeIQ · Built by Nalla Tarun Sai · TarunSaiNalla.github.io/homeiq</div>
+    </body></html>
+  `);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
 const features = [
   { name: 'Area (sq ft)',   pct: 38, color: '#1a56db' },
   { name: 'Location Tier', pct: 27, color: '#0d7a55' },
